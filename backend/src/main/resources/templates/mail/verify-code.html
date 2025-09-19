@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>verify code </title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #333; margin-bottom: 20px;">Tech-Notes - Verify Code</h2>
+    <p style="color: #666; line-height: 1.6;">Dear Users：</p>
+    <p style="color: #666; line-height: 1.6;">You are <span th:text="${operationType}">registering</span>，verify code：</p>
+    <div style="background-color: #f8f8f8; padding: 15px; border-radius: 4px; text-align: center; margin: 20px 0;">
+        <span style="font-size: 24px; font-weight: bold; color: #1890ff;" th:text="${verifyCode}">123456</span>
+    </div>
+    <p style="color: #666; line-height: 1.6;">it will expire in 15 minitues</p>
+    <p style="color: #666; line-height: 1.6;">if you are not doing this, please ignore this letter</p>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #999; font-size: 12px;">
+        <p>please do not reply this email,it is automatically generated</p>
+        <p>© 2025 Tech Notes. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
