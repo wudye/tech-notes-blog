@@ -3,7 +3,9 @@ package com.mwu.backend.model.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -11,6 +13,8 @@ import java.util.Objects;
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
 public class CollectionNoteId implements Serializable {
     private Integer collectionId;
     private Integer noteId;

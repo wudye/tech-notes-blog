@@ -346,3 +346,113 @@
     应用内：用 ApplicationEvent 处理轻量级事件（如缓存更新）。
     跨服务：用 Kafka/RabbitMQ 处理核心业务消息（如订单支付）。
     如果需要进一步探讨具体场景或实现细节，请告诉我！
+# how can get the login user himselef info in spring security
+    @RequestScope 只在单个 HTTP 请求内保存数据，每个请求都是独立的。
+    即使有 10 个用户同时登录，每个用户的请求都会有自己独立的 RequestScopeDate 实例，互不影响。
+    区分用户的关键在于：
+    每个请求带有各自的 token（如 JWT），后端解析 token 得到 userId，存入当前请求的 RequestScopeDate。
+    不同用户的请求不会共享 RequestScopeDate，所以不会混淆。
+    总结：@RequestScope 保证了每个请求、每个用户的数据隔离。    
+
+    除了使用 @RequestScope 实现每个请求用户数据隔离，还可以用以下方式实现同样效果：
+    
+    直接从 Spring Security 获取当前用户信息
+    推荐做法，适用于 Spring Security 体系下，线程安全且无需自定义作用域对象。
+    import org.springframework.security.core.Authentication;
+    import org.springframework.security.core.context.SecurityContextHolder;
+    import org.springframework.security.core.userdetails.UserDetails;
+    
+    public String getCurrentUsername() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication != null && authentication.isAuthenticated()) {
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof UserDetails) {
+    return ((UserDetails) principal).getUsername();
+    }
+    return principal.toString();
+    }
+    return null;
+    }
+    使用 @AuthenticationPrincipal 注解
+    直接在 Controller 方法参数中注入当前用户对象。
+    import org.springframework.security.core.annotation.AuthenticationPrincipal;
+    import org.springframework.security.core.userdetails.UserDetails;
+    import org.springframework.web.bind.annotation.GetMapping;
+    import org.springframework.web.bind.annotation.RestController;
+    
+    @RestController
+    public class UserController {
+    @GetMapping("/me")
+    public String me(@AuthenticationPrincipal UserDetails user) {
+    return user.getUsername();
+    }
+    }
+    
+    ThreadLocal 手动存储用户信息
+    不推荐，容易内存泄漏，Spring Security 已经帮你做了线程隔离。
+    一般建议直接用 Spring Security 提供的方式获取当前用户信息，无需额外封装。
+
+# spring jpa page check
+    用 JPA 实现一个场景：获取从第 2 页开始的 100 个用户，其中每页有 10 条记录。
+    这个需求可以理解为获取从第 2 页到第 11 页（共 10 页）的所有用户。
+    使用 Spring Data JPA，你不能一次性请求多个不连续的分页。标准的 PageRequest 只能获取一个特定的页面。要实现你的需求，你有两种主要方法：
+    方法一：调整分页参数（推荐）
+    最直接的方法是调整分页参数，将请求视为“获取从第 11 条记录开始的 100 条记录”。
+    page: 第 2 页的索引是 1 (因为 JPA 从 0 开始)。
+    size: 你需要获取 100 个用户。
+    这样，你可以创建一个 PageRequest 来精确获取从第 2 页起始位置开始的 100 个用户。
+    代码示例：
+            import org.springframework.data.domain.Page;
+    import org.springframework.data.domain.PageRequest;
+    import org.springframework.data.domain.Pageable;
+    import java.util.List;
+
+    // ... 在你的 Service 类中 ...
+    
+        public List<User> getUsersFromPageTwoOnwards() {
+        // 假设数据库中用户总数 > 100
+
+        int startPage = 2; // 从第 2 页开始
+        int usersToFetch = 100; // 获取 100 个用户
+
+        // 计算 JPA 需要的 page index 和 size
+        // Page index 从 0 开始，所以第 2 页的 index 是 1
+        int pageIndex = startPage - 1;
+        int pageSize = usersToFetch;
+
+        // 创建分页请求
+        Pageable pageRequest = PageRequest.of(pageIndex, pageSize);
+
+        // 执行查询
+        // 这里我们忽略了动态条件，直接查询所有用户并分页
+        Page<User> userPage = userRepository.findAll(pageRequest);
+
+        // 返回获取到的用户列表
+        List<User> users = userPage.getContent();
+
+        // users 列表现在会包含从第 11 个用户到第 110 个用户（共100个）
+        System.out.println("获取到的用户数量: " + users.size());
+
+        return users;
+    }
+    你也可以通过循环来一页一页地获取数据，直到获取满 100 个用户为止。这种方法会多次查询数据库，性能较差，通常不推荐。
+# if add conditon need Specification
+    import org.springframework.data.jpa.domain.Specification;
+    import javax.persistence.criteria.Predicate;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    public Specification<User> getUserSpecification(String username, Integer age) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (username != null && !username.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("username"), username));
+            }
+            if (age != null) {
+                predicates.add(criteriaBuilder.equal(root.get("age"), age));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }

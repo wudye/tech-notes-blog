@@ -53,10 +53,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                .permitAll())
+
+//        pring Security 的 .formLogin((form) -> form.loginPage("/login")) 是让后端自己提供
+//        /login 页面（通常是后端渲染的 HTML）。如果你前后端分离，前端有自己的登录页面，后端不需要配置
+//        .formLogin()，只需让前端直接调用后端的登录接口（如 /api/login），前端自己负责页面跳转和表单提交。
+//                .formLogin((form) -> form
+//                        .loginPage("/login")
+//                .permitAll())
                 .logout((logout) -> logout.permitAll())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

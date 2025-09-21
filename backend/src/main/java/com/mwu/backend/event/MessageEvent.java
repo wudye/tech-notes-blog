@@ -1,6 +1,7 @@
 package com.mwu.backend.event;
 
 import com.mwu.backend.model.enums.vo.message.MessageVO;
+import com.mwu.backend.service.CommentService;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

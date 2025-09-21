@@ -1,5 +1,6 @@
 package com.mwu.backend.model.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -24,6 +25,8 @@ public class QuestionListItem {
     /*
      * 题单内题目的顺序，从1开始
      */
+    @Column(name = "`rank`")
+
     private Integer rank;
 
     /*
