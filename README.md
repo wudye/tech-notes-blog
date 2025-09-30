@@ -1,2 +1,2 @@
-# a website it likes blog but it is only for tech notes.
-# 
+# practice the complex mysql query in spring jpa
+# only prototype, need finish the frontend 
