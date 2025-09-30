@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 public class CreateCommentRequest {
 
-    @NotBlank(message = "笔记ID不能为空")
     private Integer noteId;
 
     /**

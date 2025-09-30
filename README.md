@@ -1,1 +1,2 @@
-a website it likes blog but it is only for tech notes.
+# a website it likes blog but it is only for tech notes.
+# 

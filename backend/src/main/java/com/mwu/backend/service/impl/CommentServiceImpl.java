@@ -82,15 +82,23 @@ public class CommentServiceImpl implements CommentService {
             log.info("评论创建结果: commentId={}", comment.getCommentId());
 
             // 增加笔记评论数
-            note.setCommentCount(note.getCommentCount()  + 1);
+            Integer commentCount = note.getCommentCount();
+            if (commentCount == null) {
+                commentCount = 0;
+            }
+            note.setCommentCount(commentCount + 1);
             noteRepository.updateByCommentCount(note.getNoteId(), note.getCommentCount());
 
-            // 如果是回复评论，增加父评论的回复数
-            if (request.getParentId() != null) {
-                Comment parentComment = commentRepository.findByParentId(request.getParentId());
-                parentComment.setReplyCount(parentComment.getReplyCount() + 1);
-                commentRepository.updateByReplyCount(parentComment.getCommentId(), parentComment.getReplyCount());
+            // CommentServiceImpl.java
+            List<Comment> parentComments = commentRepository.findByParentId(request.getParentId());
+            if (CollectionUtils.isEmpty(parentComments)) {
+                log.error("父评论不存在: parentId={}", request.getParentId());
+                return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "父评论不存在");
             }
+            parentComments.forEach(c -> {
+                c.setReplyCount(c.getReplyCount() + 1);
+                commentRepository.save(c);
+            });
 
             // 发送评论通知
             MessageDTO messageDTO = new MessageDTO();
@@ -172,6 +180,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ApiResponse<List<CommentVO>> getComments(CommentQueryParams params) {
+        if (params.getPageSize() < 1) {
+            params.setPageSize(10);
+        }
         try {
             // 拉取整棵评论树（一个 note 通常也就几百条，足够了）
             List<Comment> comments = commentRepository.findByNoteId(params.getNoteId());

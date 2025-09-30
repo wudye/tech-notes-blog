@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static javax.swing.UIManager.put;
+
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -33,7 +35,9 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryVO> buildCategoryTree() {
         // 获取所有分类
         List<Category> categories = categoryRepository.findAll();
-
+        for (Category category : categories) {
+            System.out.println(category);
+        }
         // 构建父分类的 Map，用于快速查找
         Map<Integer, CategoryVO> categoryMap = new HashMap<>();
 
@@ -44,17 +48,20 @@ public class CategoryServiceImpl implements CategoryService {
                 CategoryVO categoryVO = new CategoryVO();
                 BeanUtils.copyProperties(category, categoryVO);
                 categoryVO.setChildren(new ArrayList<>());
+                System.out.println(categoryVO);
                 categoryMap.put(category.getCategoryId(), categoryVO);
             } else {
                 // 子分类
-                CategoryVO.ChildrenCategoryVO childrenCategoryVO = new CategoryVO.ChildrenCategoryVO();
+                CategoryVO childrenCategoryVO = new CategoryVO();
                 BeanUtils.copyProperties(category, childrenCategoryVO);
 
+                childrenCategoryVO.setParentCategoryId(category.getParentCategoryId());
+                categoryMap.put(category.getCategoryId(), childrenCategoryVO);
                 // 将子分类加入对应父分类的 children 列表
-                CategoryVO parentCategory = categoryMap.get(category.getParentCategoryId());
-                if (parentCategory != null) {
-                    parentCategory.getChildren().add(childrenCategoryVO);
-                }
+              //  CategoryVO parentCategory = categoryMap.get(category.getParentCategoryId());
+//                if (parentCategory != null) {
+//                    parentCategory.getChildren().add(childrenCategoryVO);
+//                }
             }
         });
         // 构建根分类列表

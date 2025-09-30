@@ -47,11 +47,11 @@ public class UserServiceImpl implements UserService {
 
     private final JwtUtil jwtUtil;
 
-    private FileService fileService;
+    private  final  FileService fileService;
 
     private final RequestScopeDate requestScopeDate;
 
-    private EmailService emailService;
+    private final EmailService emailService;
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApiResponse<RegisterVO> register(RegisterRequest request) {
@@ -195,7 +195,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse<UserVO> getUserInfo(Long userId) {
+        System.out.println("UserServiceImpl.getUserInfo" + "  " + userId + " called");
         Optional<User> user = userRepository.findByUserId(userId);
+        System.out.println("UserServiceImpl.getUserInfo" + "    " + user);
+        if (!user.isPresent()) {
+            return ApiResponseUtil.error("User not found");
+        }
         if (user.isEmpty() || user.get().getUserId() == null) {
             return ApiResponseUtil.error("User not found");
         }
@@ -209,7 +214,9 @@ public class UserServiceImpl implements UserService {
        Long userId = requestScopeDate.getUserId();
        User user = new User();
        BeanUtil.copyProperties(request, user);
+       String account = userRepository.findById(userId).get().getAccount();
        user.setUserId(userId);
+       user.setAccount(account);
        try{
            userRepository.save(user);
            return ApiResponseUtil.success("User info updated successfully");
@@ -237,6 +244,9 @@ public class UserServiceImpl implements UserService {
 
 //    @Override
 //    public ApiResponse<List<User>> getUserList(UserQueryParam queryParam) {
+//        if (queryParam.getPageSize() < 1) {
+//            queryParam.setPageSize(10);
+//        }
 //
 //        Pageable pageable = PageRequest.of(queryParam.getPage() - 1, queryParam.getPageSize());
 //        Page<User> userPage = userRepository.findAll(pageable);
@@ -267,6 +277,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse<List<User>> getUserList(UserQueryParam queryParam) {
+
+        User user = userRepository.findByUserId(requestScopeDate.getUserId()).get();
+
+        if (user.getIsAdmin() == null || user.getIsAdmin() != 1) {
+            return ApiResponseUtil.error("Access denied: Admins only");
+        }
+        if (queryParam.getPageSize() < 1) {
+            queryParam.setPageSize(10);
+        }
         // 1. 构建动态查询条件 (Specification)
         Specification<User> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -289,8 +308,16 @@ public class UserServiceImpl implements UserService {
         };
 
         // 2. 创建分页请求 (PageRequest)，JPA 的 page 从 0 开始
-        int page = queryParam.getPage() > 0 ? queryParam.getPage() - 1 : 0;
-        PageRequest pageRequest = PageRequest.of(page, queryParam.getPageSize());
+        if (queryParam.getPage() < 1) {
+            queryParam.setPage(1);
+        }
+        if (queryParam.getPageSize() < 1) {
+            queryParam.setPageSize(10);
+        }
+        int page = queryParam.getPage() - 1;
+        int pageSize = queryParam.getPageSize();
+        System.out.println("page: " + page + " pageSize: " + pageSize);
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
 
         // 3. 执行带条件的查询，获取分页结果
         Page<User> userPage = userRepository.findAll(spec, pageRequest);

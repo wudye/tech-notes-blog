@@ -33,6 +33,7 @@ public class QuestionListServiceImpl implements QuestionListService {
 
     @Override
     public ApiResponse<QuestionList> getQuestionList(Integer questionListId) {
+        System.out.println("QuestionListServiceImpl.getQuestionList" + questionListId);
         QuestionList questionList =
                 questionListRepository.findById(questionListId)
                         .orElseThrow(() -> new RuntimeException("QuestionList not found with id: " + questionListId));

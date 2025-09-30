@@ -17,13 +17,13 @@ public class CommentQueryParams {
      * 页码
      */
     @NotNull(message = "页码不能为空")
-    @Min(value = 1, message = "页码必须大于0")
+//    @Min(value = 1, message = "页码必须大于0")
     private Integer page;
 
     /**
      * 每页大小
      */
     @NotNull(message = "每页大小不能为空")
-    @Min(value = 1, message = "每页大小必须大于0")
+//    @Min(value = 1, message = "每页大小必须大于0")
     private Integer pageSize;
 }

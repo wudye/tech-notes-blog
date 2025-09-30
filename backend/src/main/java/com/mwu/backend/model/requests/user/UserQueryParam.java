@@ -27,11 +27,11 @@ public class UserQueryParam {
     private Integer isBanned;
 
     @NotNull(message = "page 不能为空")
-    @Min(value = 1, message = "page 必须为正整数")
+//    @Min(value = 1, message = "page 必须为正整数")
     private Integer page;
 
     @NotNull(message = "pageSize 不能为空")
-    @Min(value = 1, message = "pageSize 必须为正整数")
+//    @Min(value = 1, message = "pageSize 必须为正整数")
     @Max(value = 200, message = "pageSize 不能超过 200")
     private Integer pageSize;
 }

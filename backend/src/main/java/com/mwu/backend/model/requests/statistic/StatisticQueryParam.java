@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class StatisticQueryParam {
     @NotNull(message = "page 不能为空")
-    @Min(value = 1, message = "page 必须为正整数")
+//    @Min(value = 1, message = "page 必须为正整数")
     private Integer page;
 
     @NotNull(message = "page 不能为空")
-    @Min(value = 1, message = "page 必须为正整数")
+//    @Min(value = 1, message = "page 必须为正整数")
     private Integer pageSize;
 }

@@ -67,17 +67,26 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public ApiResponse<List<NoteVO>> getNotes(NoteQueryParams params) {
+        if (params.getPage() < 1) {
+            params.setPage(1);
+        }
+        if (params.getPageSize() < 1) {
+            params.setPageSize(10);
+        }
+
 
         // 计算分页参数
         int offset = PaginationUtils.calculateOffset(params.getPage(), params.getPageSize());
 
+        System.out.println("offset: " + offset);
         // 查询当前查询条件下的笔记总数
         long totalInt = countNotes(params);
 
+        System.out.println("totalInt: " + totalInt);
         int total = Math.toIntExact(totalInt);
         Pagination pagination = new Pagination(params.getPage(), params.getPageSize(), total);
 
-        Pageable pageable = PageRequest.of(params.getPage() -1 , total);
+        Pageable pageable = PageRequest.of(params.getPage() , offset);
         Page<Note> pages = noteRepository.findAll(pageable);
         List<Note> notes = pages.getContent();
 
@@ -263,9 +272,11 @@ public class NoteServiceImpl implements NoteService {
 
         Long userId = requestScopeData.getUserId();
 
+        System.out.println("userId: " + userId);
         // 获取所有笔记
         List<Note> userNotes = noteRepository.findByAuthorId(userId);
 
+        System.out.println("11111111111111111111111111111userNotes size: " + userNotes.size());
         // 将笔记转为 key = questionId, value = note 的 map 对象
         Map<Integer, Note> questionNoteMap = userNotes.stream()
                 .collect(Collectors.toMap(Note::getQuestionId, note -> note));
@@ -291,10 +302,9 @@ public class NoteServiceImpl implements NoteService {
 
             boolean hasTopLevelToc = false;
 
-            if (categoryVO.getChildren().isEmpty()) {
+            if (categoryVO.getChildren() == null || categoryVO.getChildren().isEmpty()) {
                 continue;
             }
-
             for (CategoryVO.ChildrenCategoryVO childrenCategoryVO : categoryVO.getChildren()) {
 
                 boolean hasSubLevelToc = false;

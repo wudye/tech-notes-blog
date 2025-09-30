@@ -11,9 +11,8 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    Comment findByParentId(Integer parentId);
+    List<Comment> findByParentId(Integer parentId);
 
-    @Modifying
     @Query("update Comment c set c.replyCount = :replyCount where c.commentId = :commentId")
     void updateByReplyCount(Integer commentId, Integer replyCount);
 
@@ -22,4 +21,5 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     void deleteByCommentId(Integer commentId);
 
     List<Comment> findByNoteId(@NotNull(message = "笔记ID不能为空") Integer noteId);
+
 }

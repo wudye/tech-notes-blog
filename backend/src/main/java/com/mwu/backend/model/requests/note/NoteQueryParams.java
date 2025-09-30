@@ -58,8 +58,8 @@ public class NoteQueryParams {
      * 当前页码
      * 必须是正整数，默认为1。
      */
-    @NotNull(message = "当前页码不能为空")
-    @Min(value = 1, message = "当前页码必须大于等于1")
+//    @NotNull(message = "当前页码不能为空")
+//    @Min(value = 1, message = "当前页码必须大于等于1")
     @Max(value = 200, message = "每页大小不能超过100")
     private Integer page = 1;
 
@@ -67,8 +67,8 @@ public class NoteQueryParams {
      * 每页大小
      * 必须是正整数，限制范围在 1到100之间。
      */
-    @NotNull(message = "每页大小不能为空")
-    @Min(value = 1, message = "每页大小必须大于等于1")
+//    @NotNull(message = "每页大小不能为空")
+//    @Min(value = 1, message = "每页大小必须大于等于1")
     @Max(value = 200, message = "每页大小不能超过100")
     private Integer pageSize = 10;
 }

@@ -32,7 +32,7 @@ public class CollectionController {
     @GetMapping("/collections")
     public ApiResponse<List<CollectionVO>> getCollections(
             @Valid
-            CollectionQueryParams queryParams) {
+            @ModelAttribute CollectionQueryParams queryParams) {
         return collectionService.getCollections(queryParams);
     }
 

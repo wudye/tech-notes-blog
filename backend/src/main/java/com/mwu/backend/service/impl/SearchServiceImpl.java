@@ -1,12 +1,14 @@
 package com.mwu.backend.service.impl;
 
 import com.mwu.backend.model.entity.Note;
+import com.mwu.backend.model.entity.Statistic;
 import com.mwu.backend.model.entity.User;
 import com.mwu.backend.model.responses.ApiResponse;
 import com.mwu.backend.repository.NoteRepository;
 import com.mwu.backend.repository.UserRepository;
 import com.mwu.backend.service.SearchService;
 import com.mwu.backend.utils.ApiResponseUtil;
+import com.mwu.backend.utils.PaginationUtils;
 import com.mwu.backend.utils.SearchUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +41,30 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public ApiResponse<List<Note>> searchNotes(String keyword, int page, int pageSize) {
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
+
+        System.out.println("keyword: " + keyword + ", page: " + page + ", pageSize: " + pageSize);
+
 
 
         try {
             String cacheKey = String.format(NOTE_SEARCH_CACHE_KEY, keyword, page, pageSize);
+            System.out.println("cacheKey: " + cacheKey);
             List<Note> cachedResult = (List<Note>) redisTemplate.opsForValue().get(cacheKey);
             if (cachedResult != null) {
                 return ApiResponseUtil.success("搜索成功", cachedResult);
             }
             keyword = SearchUtils.preprocessKeyword(keyword);
 
-            int offset = (page - 1) * pageSize;
+            int offset = (page) * pageSize;
 
+
+
+         //   int offset = PaginationUtils.calculateOffset(pageNum + 1, pageSize);
+
+          //  List<Statistic> statistics = statisticRepository.findAll();
             List<Note> notes = noteRepository.searchNote(keyword, pageSize, offset);
             redisTemplate.opsForValue().set(cacheKey, notes, CACHE_EXPIRE_TIME, java.util.concurrent.TimeUnit.MINUTES);
 
@@ -65,6 +79,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public ApiResponse<List<User>> searchUsers(String keyword, int page, int pageSize) {
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
         try {
             String cacheKey = String.format(USER_SEARCH_CACHE_KEY, keyword, page, pageSize);
 
@@ -75,6 +92,9 @@ public class SearchServiceImpl implements SearchService {
             }
 
             // 计算偏移量
+            if (page < 1) {
+            page = 1;
+        }
             int offset = (page - 1) * pageSize;
 
             Specification spec = (root, query, cb) -> {
@@ -100,8 +120,10 @@ public class SearchServiceImpl implements SearchService {
                 );
                 return query.getRestriction();
             };
-
-            Pageable pageable = PageRequest.of(page - 1, pageSize);
+            if (page < 1) {
+            page = 1;
+        }
+            Pageable pageable = PageRequest.of(page, pageSize);
             // 使用 Specification 和 Pageable 执行查询
             List<User> users = userRepository.findAll(spec, pageable).getContent();
 
@@ -119,6 +141,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public ApiResponse<List<Note>> searchNotesByTag(String keyword, String tag, int page, int pageSize) {
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
         try {
             String cacheKey = String.format(NOTE_TAG_SEARCH_CACHE_KEY, keyword, tag, page, pageSize);
 
@@ -130,12 +155,15 @@ public class SearchServiceImpl implements SearchService {
 
             // 处理关键词
             keyword = SearchUtils.preprocessKeyword(keyword);
-
+            if (page < 1) {
+            page = 1;
+        }
             // 计算偏移量
-            int offset = (page - 1) * pageSize;
+            int offset = (page ) * pageSize;
 
             // 执行搜索
-            List<Note> notes = noteRepository.searchNotesByTag(keyword, tag, pageSize, offset);
+    //        List<Note> notes = noteRepository.searchNotesByTag(keyword, tag, pageSize, offset);
+            List<Note> notes = noteRepository.searchNote(keyword, pageSize, offset);
 
             // 存入缓存
             redisTemplate.opsForValue().set(cacheKey, notes, CACHE_EXPIRE_TIME, TimeUnit.MINUTES);

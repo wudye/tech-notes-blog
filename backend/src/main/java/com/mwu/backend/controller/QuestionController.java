@@ -64,7 +64,7 @@ public class QuestionController {
      * @return 包含所有问题的视图对象列表的响应
      */
     @GetMapping("/admin/questions")
-    public ApiResponse<List<QuestionVO>> getQuestions(@Valid QuestionQueryParam queryParams) {
+    public ApiResponse<List<QuestionVO>> getQuestions(@Valid @ModelAttribute QuestionQueryParam queryParams) {
         return questionService.getQuestions(queryParams);
     }
 
@@ -80,6 +80,8 @@ public class QuestionController {
     }
 
     /**
+     * TODO: 需要添加权限校验，只有管理员可以访问该接口
+     * TODO: has problem must rewrite
      * 管理端批量创建问题
      * @param createQuestionBatchBody 创建问题的请求体列表，包含问题的标题、内容等信息
      * @return 创建结果

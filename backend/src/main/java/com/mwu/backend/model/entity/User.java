@@ -60,7 +60,7 @@ public class User {
     /**
      * 0=user，1=admin
      */
-    private Integer isAdmin;
+    private Integer isAdmin = 0;
 
 
     private LocalDateTime lastLoginAt;

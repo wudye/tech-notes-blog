@@ -28,21 +28,27 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Override
     public ApiResponse<List<Statistic>> getStatistic(StatisticQueryParam queryParam) {
+
+
         Integer pageNum = queryParam.getPage();
         Integer pageSize = queryParam.getPageSize();
+
         int offset = PaginationUtils.calculateOffset(pageNum, pageSize);
+
         List<Statistic> statistics = statisticRepository.findAll();
         Integer total = statistics.size();
 
-        Pagination pagination = new Pagination(pageNum, pageSize, total);
 
-        int pageIndex = pageNum - 1;
+        System.out.println(statistics.size());
+        Pagination pagination = new Pagination(pageNum, pageSize, total);
+        int pageIndex = pageNum ;
         pageSize = offset;
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+
+       Pageable pageable = PageRequest.of(pageNum, pageSize);
         try {
-            Page<Statistic> page = statisticRepository.findAll(pageable);
+           Page<Statistic> page = statisticRepository.findAll(pageable);
             List<Statistic> statisticList = page.getContent();
-            return ApiResponseUtil.success("获取统计列表成功", statistics, pagination);
+            return ApiResponseUtil.success("获取统计列表成功", statisticList);
 
         } catch (Exception e) {
             return ApiResponseUtil.error(e.getMessage());

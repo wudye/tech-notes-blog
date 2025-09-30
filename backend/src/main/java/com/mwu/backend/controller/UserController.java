@@ -34,6 +34,8 @@ public class UserController {
             @Valid
             @RequestBody
             RegisterRequest request) {
+
+        log.info("UserController.register called");
         return userService.register(request);
     }
 
@@ -55,7 +57,6 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public ApiResponse<UserVO> getUserInfo(
             @PathVariable
-            @Pattern(regexp = "\\d+", message = "ID 格式错误")
             Long userId) {
         return userService.getUserInfo(userId);
     }
@@ -75,6 +76,7 @@ public class UserController {
     @GetMapping("/admin/users")
     public ApiResponse<List<User>> adminGetUser(
             @Valid UserQueryParam queryParam) {
+
         return userService.getUserList(queryParam);
     }
 

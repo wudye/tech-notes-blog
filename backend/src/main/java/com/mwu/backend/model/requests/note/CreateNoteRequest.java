@@ -10,7 +10,6 @@ public class CreateNoteRequest {
     /*
      * 问题ID
      */
-    @NotNull(message = "问题 ID 不能为空")
     @Min(value = 1, message = "问题 ID 必须为正整数")
     private Integer questionId;
 

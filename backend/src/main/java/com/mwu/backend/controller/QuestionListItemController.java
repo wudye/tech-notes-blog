@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+// TODO  without using admin to access these APIs
 @RestController
 @RequestMapping("/api")
 public class QuestionListItemController {
@@ -32,7 +34,7 @@ public class QuestionListItemController {
      */
     @GetMapping("/questionlist-items")
     public ApiResponse<List<QuestionListItemUserVO>> userGetQuestionListItems(
-            @Valid QuestionListItemQueryParams queryParams) {
+            @Valid @ModelAttribute QuestionListItemQueryParams queryParams) {
         return questionListItemService.userGetQuestionListItems(queryParams);
     }
 

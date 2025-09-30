@@ -3,13 +3,16 @@ package com.mwu.backend.model.requests.question;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateQuestionBody {
-    @NotNull(message = "categoryId 不能为空")
     @Min(value = 1, message = "categoryId 必须为正整数")
     private Integer categoryId;
 

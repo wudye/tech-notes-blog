@@ -52,6 +52,14 @@ public class QuestionListItemServiceImpl implements QuestionListItemService {
 
     @Override
     public ApiResponse<List<QuestionListItemUserVO>> userGetQuestionListItems(QuestionListItemQueryParams queryParams) {
+        if (queryParams.getPage() < 1) {
+            queryParams.setPage(1);
+        }
+        if (queryParams.getPageSize() < 1) {
+            queryParams.setPageSize(10);
+        }
+
+
         int offset = PaginationUtils.calculateOffset(queryParams.getPage(), queryParams.getPageSize());
 
         int total = questionListItemRepository.countByQuestionListId(queryParams.getQuestionListId());
@@ -62,7 +70,7 @@ public class QuestionListItemServiceImpl implements QuestionListItemService {
         Integer questionListId = queryParams.getQuestionListId();
 
         QuestionList questionList = questionListRepository.findById(questionListId).orElse(null);
-        Pageable pageable = PageRequest.of(queryParams.getQuestionListId(), offset);
+        Pageable pageable = PageRequest.of(queryParams.getPage(), queryParams.getPageSize());
         Page page =  questionListItemRepository.findAll(pageable);
 
         List<QuestionListItem> questionListItems = page.getContent();
@@ -125,6 +133,10 @@ public class QuestionListItemServiceImpl implements QuestionListItemService {
     public ApiResponse<CreateQuestionListItemVO> createQuestionListItem(CreateQuestionListItemBody body) {
         QuestionListItem questionListItem = new QuestionListItem();
         BeanUtils.copyProperties(body, questionListItem);
+        QuestionListItemId questionListItemId = new QuestionListItemId();
+        questionListItemId.setQuestionListId(body.getQuestionListId());
+        questionListItemId.setQuestionId(body.getQuestionId()); // 补充这一行
+        questionListItem.setId(questionListItemId);
         try {
             int rank = questionListItemRepository.nextRank(body.getQuestionListId());
             questionListItem.setRank(rank);
@@ -135,7 +147,9 @@ public class QuestionListItemServiceImpl implements QuestionListItemService {
 
             return ApiResponseUtil.success("create success", createQuestionListItemVO);
         } catch (Exception e) {
-            return ApiResponseUtil.error("create fail: " + e.getMessage());
+            throw new RuntimeException(e);
+            //
+           // return ApiResponseUtil.error("create fail: " + e.getMessage());
         }
     }
 

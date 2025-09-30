@@ -69,6 +69,10 @@ public class SearchUtils {
      * @return 偏移量
      */
     public static int calculateOffset(int page, int pageSize) {
+        if (pageSize < 1) {
+            pageSize = 10;
+//            throw new IllegalArgumentException("Page size must not be less than one");
+        }
         return Math.max(0, (page - 1) * pageSize);
     }
 }

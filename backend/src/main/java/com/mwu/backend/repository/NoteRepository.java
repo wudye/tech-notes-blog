@@ -30,9 +30,9 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
     int getTotalNoteCount();
 
     @Query(
-            value = "SELECT n.*, MATCH(n.search_vector) AGAINST(:keyword IN NATURAL LANGUAGE MODE) as relevance " +
+            value = "SELECT n.*, MATCH(n.content) AGAINST(:keyword IN NATURAL LANGUAGE MODE) as relevance " +
                     "FROM notes n " +
-                    "WHERE MATCH(n.search_vector) AGAINST(:keyword IN NATURAL LANGUAGE MODE) " +
+                    "WHERE MATCH(n.content) AGAINST(:keyword IN NATURAL LANGUAGE MODE) " +
                     "ORDER BY relevance DESC " +
                     "LIMIT :limit OFFSET :offset",
             nativeQuery = true
@@ -42,6 +42,7 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
             @Param("limit") int limit,
             @Param("offset") int offset
     );
+
 
     @Query(
             value = "SELECT DISTINCT n.*, " +
@@ -76,7 +77,6 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
 
     @Query("SELECT n FROM Note n WHERE n.authorId = :userId")
     List<Note> findByAuthorId(Long userId);
-    @Modifying
     @Query(
             value = "SELECT n.author_id AS authorId, " +
                     "u.username AS username, " +
@@ -94,7 +94,6 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
     List<NoteRankListItem> submitNoteRank();
 
 
-    @Modifying
     @Query(
             value = "WITH DailyNoteCounts AS (" +
                     "    SELECT author_id," +
@@ -112,7 +111,7 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
                     "SELECT note_count AS count," +
                     "       note_date AS date," +
                     "       note_rank AS `rank`" +
-                    "FROM RankedNotes" +
+                    "FROM RankedNotes " +
                     "WHERE author_id = :authorId",
             nativeQuery = true
     )
@@ -120,7 +119,6 @@ public interface NoteRepository extends JpaRepository<Note, Integer>, JpaSpecifi
 
 
 
-    @Modifying
     @Query(
             value = "WITH DailyNoteCounts AS (" +
                     "SELECT author_id, DATE(created_at) AS note_date, COUNT(note_id) AS note_count " +

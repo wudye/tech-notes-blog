@@ -95,6 +95,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public ApiResponse<List<QuestionVO>> getQuestions(QuestionQueryParam queryParams) {
+        if (queryParams.getPage() < 1) {
+            queryParams.setPage(1);
+        }
+        if (queryParams.getPageSize() < 1) {
+            queryParams.setPageSize(10);
+        }
 
         int offset = PaginationUtils.calculateOffset(queryParams.getPage(), queryParams.getPageSize());
 
@@ -116,6 +122,9 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private List<Question> getQuestionsRepo(QuestionQueryParam queryParams, int offset, @NotNull(message = "pageSize 不能为空") @Min(value = 1, message = "pageSize 必须为正整数") @Max(value = 200, message = "pageSize 不能超过 200") Integer pageSize) {
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
         Specification<Question> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (queryParams.getCategoryId() != null) {
@@ -266,6 +275,7 @@ public class QuestionServiceImpl implements QuestionService {
                                         addQuestion.setDifficulty(difficultyVal);
 
                                         try {
+                                            System.out.println("创建问题: " + addQuestion);
                                             questionRepository.save(addQuestion);
                                         } catch (Exception e) {
                                             throw new RuntimeException("创建问题失败: " + e.getMessage());
@@ -360,12 +370,14 @@ public class QuestionServiceImpl implements QuestionService {
             return ApiResponseUtil.error("questionId 非法");
         }
 
+        System.out.println("用户 ID: " + question);
         QuestionNoteVO questionNoteVO = new QuestionNoteVO();
         QuestionNoteVO.UserNote userNote = new QuestionNoteVO.UserNote();
 
         // 如果是登录状态，则查询出当前用户笔记
         if (requestScopeData.isLogin() && requestScopeData.getUserId() != null) {
             Note note = noteRepository.findByAuthorIdAndQuestionId(requestScopeData.getUserId(), questionId);
+            System.out.println("用户笔记: " + note);
             if (note != null) {
                 userNote.setFinished(true);
                 BeanUtils.copyProperties(note, userNote);
@@ -373,11 +385,18 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         BeanUtils.copyProperties(question, questionNoteVO);
+        userNote.setFinished(true);
+        userNote.setNoteId(123);
+        userNote.setContent("笔记内容");
         questionNoteVO.setUserNote(userNote);
 
         // 增加问题的点击量
         // TODO: 有待优化
-        question.setViewCount(question.getViewCount() + 1);
+        Integer viewCount = question.getViewCount();
+        if (viewCount == null) {
+            viewCount = 0;
+        }
+        question.setViewCount(viewCount + 1);
         questionRepository.save(question);
 
         return ApiResponseUtil.success("获取问题成功", questionNoteVO);
@@ -386,11 +405,15 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public ApiResponse<List<QuestionVO>> searchQuestions(SearchQuestionBody body) {
         String keyword = body.getKeyword();
+        System.out.println("搜索关键词: " + keyword);
 
         // TODO: 简单实现搜索问题功能，后续需要优化
         List<Question> questionList = questionRepository.findByKeyword(keyword);
 
+
+        System.out.println("搜索结果数量: " + questionList.size());
         List<QuestionVO> questionVOList = questionList.stream().map(question -> {
+            System.out.println("搜索结果: " + question.getTitle());
             QuestionVO questionVO = new QuestionVO();
             BeanUtils.copyProperties(question, questionVO);
             return questionVO;

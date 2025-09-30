@@ -1,32 +1,33 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
-/* import type { UserState } from '@/domain/user'
-import { Gender, Admin } from '@/domain/user' */
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { UserState } from '@/domain/user'
+import { Gender, Admin } from '@/domain/user'
 
-interface UserState {
-    name: string;
-    age: number;
+const initialUserState: UserState = {
+  userId: '',
+  username: '',
+  account: '',
+  email: '',
+  avatarUrl: '',
+  gender: Gender.OTHER,
+  school: '',
+  signature: '',
+  birthday: '',
+  isAdmin: Admin.NOT_ADMIN,
 }
-
-const initialState: UserState = {
-    name: 'Guest',
-    age: 0,
-}
-
 
 const userSlice = createSlice({
-    name: 'user',
-    initialState,
-    reducers: {
-        setName(state, action: PayloadAction<string>) { 
-            state.name = action.payload
-        },
-        setAge(state, action: PayloadAction<number>) {
-            // 更新用户年龄
-            state.age = action.payload;
-        }
+  name: 'user',
+  initialState: initialUserState,
+  reducers: {
+    setUser: (_, action: PayloadAction<UserState>) => {
+      return action.payload
     },
+    resetUser: () => {
+      return initialUserState
+    },
+  }
+
 })
 
-export const { setName, setAge } = userSlice.actions
+export const { setUser, resetUser } = userSlice.actions
 export default userSlice.reducer

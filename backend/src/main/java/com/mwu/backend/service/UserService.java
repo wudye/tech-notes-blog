@@ -26,7 +26,7 @@ public interface UserService {
 
     ApiResponse<LoginUserVO> whoami();
 
-    ApiResponse<UserVO> getUserInfo(@Pattern(regexp = "\\d+", message = "ID 格式错误") Long userId);
+    ApiResponse<UserVO> getUserInfo(Long userId);
 
     ApiResponse<LoginUserVO> updateUserInfo(@Valid UpdateUserRequest request);
 
